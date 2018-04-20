@@ -1,433 +1,245 @@
-#Database
-pid='P.ID.,,'
-lname='League Name,,'
-name='Full Name,,'
-age = 'age,,'
-sal='SALARY,,'
-position='Position\n'
-table = []
-index = None
-def createDatabase() :
-    #checking if file exists or not
-    import os.path
-    if not os.path.isfile('pythonDB.txt') :
-        #if file doesn't exist then creating a new file
-        fo = open('pythonDB.txt','w')
-        fo.close()
-    else :
-        print('Database is already created')
+from tkinter import *
+
+import tkinter
+top=tkinter.Tk()
+count=0
+
+Pid=StringVar()
+Pname=StringVar()
+age=StringVar()
+position=StringVar()
+salary=StringVar()
+
+def Add_Vehicle():
+    f=open('pythonDB.txt','a')
+    Pid=E1.get()
+    Pname=E2.get()
+    age=E3.get()
+    position=E4.get()
+    salary=E5.get()
+    if(Pid=='' or Pname=='' or  age=='' or position=='' or salary==''):
+        print("Details can't be empty!")
+        exit()
+    f.writelines(Pid.ljust(20)+Pname.ljust(20)+age.ljust(20)+position.ljust(20)+salary.ljust(3)+"\n")
+    print("Record added to file!")
+    f.close()
+
+def Delete_Vehicle():
+    k=Pid.get()
+    f=open('pythonDB.txt','r')
+    ctr=0
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    lines=f.readlines()
+    print(lines)
+    f.close()
+    f=open('pythonDB.txt','w')
+    for ve in lines:
+        j=ve.split()
+        print(j)
+        if(j[0]!=k):
+            f.writelines(j[0].ljust(20)+j[1].ljust(20)+j[2].ljust(20)+j[3].ljust(20)+j[4].ljust(5)+"\n")
+    f.close()
+
+def Search_Vehicle():
+    k=Pid.get()
+    f=open('pythonDB.txt','r')
+    ctr=0
+    flag=0
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    lines=f.readlines()
+    print(lines)
+    for book in lines:
+        j=book.split()
+        if(j[0]==k):
+            print(j)
+            Pid.set(j[0])
+            Pname.set(j[1])
+            age.set(j[2])
+            position.set(j[3])
+            salary.set(j[4])
+            flag=1
+            break
+    if(flag==0):
+        print("Record not found!")
+    else:
+        print("Record found!")
+    f.close()
+
+def Update_Vehicle():
+    new_Pid=Pid.get()
+    new_Pname=Pname.get()
+    new_age=age.get()
+    new_position=position.get()
+    new_salary=salary.get()
+    f=open('pythonDB.txt','r')
+    ctr=0
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    lines=f.readlines()
+    f.close()
+    f=open('pythonDB.txt','w')
+    for vec in lines:
+        j=vec.split()
+        if(j[0]!=new_Pid):
+            f.writelines(j[0].ljust(20)+j[1].ljust(20)+j[2].ljust(20)+j[3].ljust(20)+j[4].ljust(3)+"\n")
+        else:
+            f.writelines(j[0].ljust(20)+new_Pname.ljust(20)+new_age.ljust(20)+new_position.ljust(20)+new_salary.ljust(3)+"\n")
+    print("Record updated!!")
+    f.close()
+
+def Get_First_Record():
+    global count
+    count=1
+    f=open('pythonDB.txt','r')
+    ctr=0
+    flag=0
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    lines=f.readlines()
+    l=list(lines)
+    print("\n")
+    print(l)
+    j=l[0].split()
+    Pid.set(j[0])
+    Pname.set(j[1])
+    age.set(j[2])
+    position.set(j[3])
+    salary.set(j[4])
+    print("\n First Record of file is as:")
+    print(l[0])
+    f.close()
 
 
-#making my own error to use while inserting the data
-#for not null constraint
-class NotNull(Exception) :
-    pass
-#for limiting the size of the input
-class OverFlow(Exception) :
-    pass
-class UnderFlow(Exception) :
-    pass
-class UniqueConstraint(Exception) :
-    pass
+def Get_Last_Record():
+    f=open('pythonDB.txt','r')
+    ctr=0
+    flag=0
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    lines=f.readlines()
+    l=list(lines)
+    print(l)
+    j=l[ctr-1].split()
+    Pid.set(j[0])
+    Pname.set(j[1])
+    age.set(j[2])
+    position.set(j[3])
+    salary.set(j[4])
+    print("\n Last Record of file is as:")
+    print(l[ctr-1])
+    f.close()
+    global count
+    count=ctr-1
 
 
-#craeting a function to write in file
-def writeFile(row) :
-    try :
-        #checking if file exist or not
-        import os.path
-        #if file doesn't exist  then raising an error
-        if not os.path.isfile('pythonDB.txt') :
-            raise FileNotFoundError
-        #if file exists then wrting the value in tuple iti the file
-        else :
-            fa = open('pythonDB.txt','a')
-            for i in row :
-                fa.write(i)
-            fa.close()
-    except FileNotFoundError :
-        print('database does not exist !! create a new database')
+def Get_Next_Record():
 
-def readFile() :
-    try :
-        with open('pythonDB.txt','r') as fr :
-            l = [tuple(map(str, i.split(',,'))) for i in fr]
-        return l
-    except FileNotFoundError :
-        print('database does not exist')
+    global count
+    i=0
+    ctr=0
+    f=open('pythonDB.txt','r')
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    try:
+        while(i<=count):
+            l=f.readline()
+            i=i+1
+        m=l.split()
+        Pid.set(m[0])
+        Pname.set(m[1])
+        age.set(m[2])
+        position.set(m[3])
+        salary.set(m[4])
+        print(m)
+    except:
+        Pid.set("")
+        Pname.set("")
+        age.set("")
+        position.set("")
+        salary.set("")
+        print("Sorry, no more records!")
+    count=count+1
+    f.close()
 
-#creating a function to insert values into the table
-def insertTable(pid,name,age,lname,sal,position) :#pid,name,age,lname,sal,position) :
-    try :
-        #global pid,name,age,lname,sal,position
-        flag = 0
-        #inserting pid
-        # pid = input('enter value of P.ID.\t')
-        pid = pid.strip()
-        pid = pid.upper()
-        z = readFile()
-        for i in range(len(z)) :
-            if pid == z[i][0] :
-                flag = 1
-                break
-            else :
-                flag = 0
-        if flag == 1 :
-            raise UniqueConstraint('')
-        #checking for not null constraint
-        elif len(pid) == 0 :
-            n = 'P.ID.'
-            raise NotNull('')
-        #checking for length of size
-        elif len(pid) > 5 :
-            n = 5
-            raise OverFlow('')
-        else :
-            #added ',,' at last so that while reading from file i can seperate out the values
-            pid = pid.upper()+',,'
-        #HAVE TO  ADD UNIQUNESS CONSTRAINT HERE
+def Get_Prev_Record():
+    global count
+    i=0
+    ctr=0
+    f=open('pythonDB.txt','r')
+    for line in f:
+        ctr=ctr+1
+    print("No. of lines in file:")
+    print(ctr)
+    f.seek(0)
+    try:
+        while(i<=count-1):
+            l=f.readline()
+            i=i+1
+        m=l.split()
+        Pid.set(m[0])
+        Pname.set(m[1])
+        age.set(m[2])
+        position.set(m[3])
+        salary.set(m[4])
+        print(m)
+    except:
+        Pid.set("")
+        Pname.set("")
+        age.set("")
+        position.set("")
+        salary.set("")
+        print("Sorry, no more records!")
+    count=count-1
+    f.close()
 
-        #inserting full name
-        # name = input('enter the full name\t')
-        if len(name) == 0 :
-            n = 'First Name'
-            raise NotNull('')
-        elif len(name) > 30 :
-            n = 30
-            raise OverFlow('')
+tkinter.Label(top, text="Player ID:",font=('Berlin Sans FB',15),bg="cyan").grid(row=0)
+tkinter.Label(top, text="Player Name:",font=('Berlin Sans FB',15),bg="cyan").grid(row=1)
+tkinter.Label(top, text="Player age:",font=('Berlin Sans FB',15),bg="cyan").grid(row=2)
+tkinter.Label(top, text="Player position:",font=('Berlin Sans FB',15),bg="cyan").grid(row=3)
+tkinter.Label(top, text="salary:",font=('Berlin Sans FB',15),bg="cyan").grid(row=4)
+E1 = tkinter.Entry(top,textvariable=Pid)
+E2 = tkinter.Entry(top,textvariable=Pname)
+E3 = tkinter.Entry(top,textvariable=age)
+E4 = tkinter.Entry(top,textvariable=position)
+E5 = tkinter.Entry(top,textvariable=salary)
+E1.grid(row=0, column=1)
+E2.grid(row=1, column=1)
+E3.grid(row=2, column=1)
+E4.grid(row=3, column=1)
+E5.grid(row=4, column=1)
 
-        else :
-            name = name.capitalize()+',,'
-        #inserting age
-        # age=input('insert player age')
-        age = age + ',,'
+fr=tkinter.Button(top,text="First",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Get_First_Record).grid(row=5, column=0)
+pr=tkinter.Button(top,text="Previous",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Get_Prev_Record).grid(row=5, column=1)
+nr=tkinter.Button(top,text="Next",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Get_Next_Record).grid(row=5, column=2)
+lr=tkinter.Button(top,text="Last",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Get_Last_Record).grid(row=5, column=3)
 
-
-        #inserting league name
-        # lname = input('enter the league name\t')
-        if len(lname) == 0 :
-            n = 'Last Name'
-            raise NotNull('')
-        elif len(lname) > 30 :
-            n = 30
-            raise OverFlow('')
-
-        else :
-            lname = lname.capitalize()+',,'
-
-        #inserting player salary
-        # sal = input('enter the player salary\t')
-        if len(sal) == 0 :
-            n = 'SALARY'
-            raise NotNull('')
-        elif not sal.isdigit() :
-            n = 'numbers'
-            raise ValueError
-
-        else :
-            sal = sal+',,'
-
-
-
-        #inserting position
-        # position = input('enter player position\t')
-
-        #here checking that only position contains alphabets and blankspace
-        if not(position.isalpha() or any(i == ' ' for i in position)) :
-            n = '"alphabets" or " "'
-            raise ValueError('')
-        else :
-            position = position.title()+',,'
-
-        # pic = input('enter the image name')
-        pic = pic+'\n'
-
-        #inserting all the values in tuple
-        t=(pid,name,age,lname,sal,position,pic)
-        #calling the write in  file function to insert all the entries scanned from user
-        writeFile(t)
-        print(t)
-        return t
-
-
-
-    except NotNull :
-        print(n,'cannot be null')
-        return("input cannot be null")
-    except OverFlow :
-        print('word limit is',n)
-        return "word limit is 30"
-    except ValueError :
-        print('input should contain only',n)
-        return"enter value correctly"
-    except UnderFlow :
-        print('length of input should not be less than',n)
-    except UniqueConstraint :
-
-        print('P.ID. should be unique')
-        return"pid cannot be null"
-
-
-
-
-
-def printTable() :
-    try :
-        '''fr = open('pythonDB.txt','r')
-        l = [tuple(map(str, i.split(',,'))) for i in fr]
-        l.sort()'''
-        l = readFile()
-        l.sort()
-        global pid,name,age,lname,sal,position
-        pid='P.ID.'
-        lname='League Name'
-        name='First Name'
-        age='age'
-        sal='SALARY'
-        position='Position\n'
-        t=(pid,name,age,lname,sal,position)
-        l.insert(0,t)
-        for i in l :
-            print(i)
-        '''for i in l :
-            for j in i :
-                print(j+'\t',end=' ')
-            print()'''
-        return l
-
-    except FileNotFoundError :
-        print('database does not exist create a new database!!')
-
-
-
-def search() :
-    try :
-        p = input('enter the P.ID. you want to search\t')
-        p = p.upper()
-        '''with open('pythonDB.txt','r') as fr :
-            l = [tuple(map(str, i.split(',,'))) for i in fr]
-        l.sort()'''
-        l = readFile()
-        l.sort()
-        flag = 0
-        for i in range(len(l)) :
-            if p == l[i][0] :
-                flag = 1
-                break
-        if flag == 1 :
-            print(l[i])
-        else :
-            print('no entry found')
-
-    except FileNotFoundError :
-        print('database does not exist create a new database!!')
-
-
-
-def firstTuple() :
-    try :
-        l = readFile()
-        l.sort()
-        print(l[0])
-        global index
-        index = 0
-        return(l[0])
-    except FileNotFoundError :
-        print('database does not exist create a new database!!')
-    except  IndexError :
-        print('database is empty')
-
-
-def lastTuple() :
-    try :
-        l = readFile()
-        l.sort()
-        print(l[len(l)-1])
-        global index
-        index = len(l)-1
-        return l[index]
-
-    except FileNotFoundError :
-        print('database does not exist create a new database!!')
-    except  IndexError :
-        print('database is empty')
-
-def nextTuple() :
-    try :
-        l = readFile()
-        l.sort()
-        global index
-        if index == len(l)-1 :
-            print('table finished')
-        elif index == None :
-            print('select a row first')
-        else :
-            index += 1
-            print(l[index])
-            return(l[index])
-    except FileNotFoundError :
-        print('database does not exist')
-
-def prevTuple() :
-    try :
-        l = readFile()
-        l.sort()
-        global index
-        if index == 0 :
-            print('table finished')
-        elif index == None :
-            print('select a row first')
-        else :
-            index -= 1
-            print(l[index])
-            return(l[index])
-    except FileNotFoundError :
-        print('database does not exist')
-
-
-def delete() :
-    try :
-        l = readFile()
-        p = input('enter the P.ID.')
-        p = p.upper()
-        for i in range(len(l)) :
-            if  p == l[i][0] :
-                flag = 1
-                break
-            else :
-                flag = 0
-        if flag == 1 :
-            del(l[i])
-            l1=[]
-            for j in l :
-                l1.append(',,'.join(j))
-            with open('pythonDB.txt','w') as fw :
-                fw.writelines(l1)
-        else :
-            print('no data found')
-    except FileNotFoundError:
-        print('database not found')
-
-def update() :
-    try :
-        p = input('enter pid whose data you have to update')
-        p = p.upper()
-        l = readFile()
-        for i in range(len(l)) :
-            if p == l[i][0] :
-                flag = 1
-                print(l[i])
-                break
-            else :
-                flag = 0
-
-        if flag == 1 :
-            with open('pythonDB.txt','r') as fr :
-                l1 = fr.readlines()
-            global pid, name, age, lname, sal, position
-            #inserting first name
-            name = input('enter the full name\t')
-            if len(name) == 0 :
-                n = 'First Name'
-                raise NotNull('')
-            elif len(name) > 30 :
-                n = 30
-                raise OverFlow('')
-            #checking if first name contains only alphabets
-
-            else :
-                name = name.capitalize()+',,'
-            #insering age
-            age=input('insert player age')
-            age = age + ',,'
-
-
-        #inserting last name
-            lname = input('enter the last name\t')
-            if len(lname) == 0 :
-                n = 'Last Name'
-                raise NotNull('')
-            elif len(lname) > 10 :
-                n = 10
-                raise OverFlow('')
-            elif not lname.isalpha() :
-                n = 'alphabets'
-                raise ValueError('')
-            else :
-                lname = lname.capitalize()+',,'
-
-            #inserting player salary
-            sal = input('enter the player salary\t')
-            if len(sal) == 0 :
-                n = 'Salary'
-                raise NotNull
-            elif not sal.isdigit() :
-                n = 'numbers'
-                raise ValueError
-
-            else :
-                sal = sal+',,'
-
-
-
-            #inserting position
-            position = input('enter the player position\t')
-
-            #here checking that only position contains alphabets and blankspace
-            if not(position.isalpha() or any(i == ' ' for i in position)) :
-                n = '"alphabets" or " "'
-                raise ValueError
-            else :
-                position = position.title()+'\n'
-
-            t = pid+name+lname+sal+position
-            l1[i] = t
-            with open('pythonDB.txt','w') as fw :
-                fw.writelines(l1)
-        else :
-            print('data not found with pid',p)
-
-    except NotNull :
-        print(n,'cannot be null')
-    except OverFlow :
-        print('word limit is',n)
-    except ValueError :
-        print('input should contain only',n)
-    except UnderFlow :
-        print('length of input should not be less than',n)
-
-
-
-import sys
-'''
-while(True) :
-    try :
-        a = int(input('\n1\tcreate table\n2\tinsert in table\n3\tprint table\n4\tprint first row of table\n5\tprint last row of table\n6\tsearch\n7\tprint next row\n8\tprint previous row\n9\tupdate\n10\tdelete\n11\texit\nenter\t'))
-        if a == 1 :
-            createDatabase()
-        elif a == 2 :
-            insertTable()
-        elif a == 3 :
-            printTable()
-        elif a== 4 :
-            firstTuple()
-        elif a == 5 :
-            lastTuple()
-        elif a == 6 :
-            search()
-        elif a== 7 :
-            nextTuple()
-        elif a == 8 :
-            prevTuple()
-        elif a == 9 :
-            update()
-        elif a == 10 :
-            delete()
-        elif a== 11 :
-            sys.exit()
-        else :
-            print("enter value from 1 to 11")
-    except ValueError :
-        print("enter value correctly")
-
-'''
+rb=tkinter.Button(top,text="ADD",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Add_Vehicle).grid(row=7, column=0)
+db=tkinter.Button(top,text="DELETE",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Delete_Vehicle).grid(row=7, column=1)
+sb=tkinter.Button(top,text="SEARCH",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Search_Vehicle).grid(row=7, column=2)
+ub=tkinter.Button(top,text="UPDATE",width=15,bg="light salmon",font=('Berlin Sans FB',15 ),command=Update_Vehicle).grid(row=7, column=3)
+top.configure(bg="light salmon")
+canv = Canvas(top,bg = 'powderblue',height = 200,width=200)
+canv.grid(row=2,column=2,columnspan=2,rowspan=2)
+file = PhotoImage(file = 'bro.png')
+img = canv.create_image(102,102,image=file)
+top.mainloop()

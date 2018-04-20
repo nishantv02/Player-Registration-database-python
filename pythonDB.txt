@@ -1,0 +1,2 @@
+1                   Nishant Verma       19                  Winger              40000
+2                   Nehal Birla         19                  GK                  30000
